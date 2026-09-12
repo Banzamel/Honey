@@ -2,6 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState, type ReactNode} from 
 import {HONEY_CONSENT_CHANGE_EVENT} from './bootstrap-events'
 import {CookieConsentContextProvider, type CookieConsentContextValue} from './CookieConsentContext'
 import {detectDocumentCookies} from './CookieConsent.inventory'
+import {sweepRejectedStorage, type CookieConsentSweepResult} from './CookieConsent.sweep'
 import {
     COOKIE_CONSENT_COOKIE_MAX_AGE_DAYS,
     COOKIE_CONSENT_COOKIE_NAME,
@@ -12,11 +13,7 @@ import {
     createCookieConsentDeclaration,
     mergeCookieConsentTexts,
 } from './CookieConsent.defaults'
-import {
-    clearStoredCookieConsent,
-    readStoredCookieConsent,
-    writeStoredCookieConsent,
-} from './CookieConsent.storage'
+import {clearStoredCookieConsent, readStoredCookieConsent, writeStoredCookieConsent} from './CookieConsent.storage'
 import type {
     CookieCategoryDefinition,
     CookieCategoryRules,
@@ -65,6 +62,13 @@ export interface CookieConsentProviderProps {
     onAcceptAll?: (state: CookieConsentState) => void
     onRejectAll?: (state: CookieConsentState) => void
     onWithdraw?: () => void
+    /** Remove the storage a category owned as soon as that category is turned
+     *  off, so a withdrawn consent does not leave its values on the device.
+     *  Only entries an explicit rule recognised are removed — see
+     *  `sweepRejectedStorage`. Default `true`. */
+    sweepOnReject?: boolean
+    /** Fires after a sweep that actually removed something. */
+    onSweep?: (removed: CookieConsentSweepResult) => void
 }
 
 function normalizeCategories(
@@ -73,8 +77,7 @@ function normalizeCategories(
     defaultConsent?: Partial<Record<string, boolean>>
 ) {
     return categories.reduce<Record<string, boolean>>((acc, category) => {
-        const nextValue =
-            values?.[category.key] ?? defaultConsent?.[category.key] ?? category.defaultValue ?? false
+        const nextValue = values?.[category.key] ?? defaultConsent?.[category.key] ?? category.defaultValue ?? false
         acc[category.key] = category.required ? true : Boolean(nextValue)
         return acc
     }, {})
@@ -179,16 +182,12 @@ export function CookieConsentProvider({
     onAcceptAll,
     onRejectAll,
     onWithdraw,
+    sweepOnReject = true,
+    onSweep,
 }: CookieConsentProviderProps) {
-    const texts = useMemo(
-        () => mergeCookieConsentTexts(DEFAULT_HONEY_TEXTS, textsOverride),
-        [textsOverride]
-    )
+    const texts = useMemo(() => mergeCookieConsentTexts(DEFAULT_HONEY_TEXTS, textsOverride), [textsOverride])
     const categories = useMemo(
-        () =>
-            categoriesProp && categoriesProp.length > 0
-                ? categoriesProp
-                : createCookieConsentCategories(texts),
+        () => (categoriesProp && categoriesProp.length > 0 ? categoriesProp : createCookieConsentCategories(texts)),
         [categoriesProp, texts]
     )
     const categoriesRef = useRef(categories)
@@ -204,9 +203,7 @@ export function CookieConsentProvider({
     const [declaration, setDeclaration] = useState<CookieDeclarationItem[]>(
         declarationProp ?? createCookieConsentDeclaration()
     )
-    const [inventory, setInventory] = useState(() =>
-        detectDocumentCookies({requiredCookies, categoryRules})
-    )
+    const [inventory, setInventory] = useState(() => detectDocumentCookies({requiredCookies, categoryRules}))
 
     useEffect(() => {
         let mounted = true
@@ -287,9 +284,7 @@ export function CookieConsentProvider({
                 const shouldOpenBanner = Boolean(autoShow && (!nextState || reopenOnVersionChange))
 
                 setState((currentState) => (currentState == null ? currentState : null))
-                setBannerOpen((currentValue) =>
-                    currentValue === shouldOpenBanner ? currentValue : shouldOpenBanner
-                )
+                setBannerOpen((currentValue) => (currentValue === shouldOpenBanner ? currentValue : shouldOpenBanner))
             }
 
             setReady(true)
@@ -321,9 +316,7 @@ export function CookieConsentProvider({
     const refreshInventory = useCallback(() => {
         const nextInventory = detectDocumentCookies({requiredCookies, categoryRules})
 
-        setInventory((current) =>
-            areDetectedCookiesEqual(current, nextInventory) ? current : nextInventory
-        )
+        setInventory((current) => (areDetectedCookiesEqual(current, nextInventory) ? current : nextInventory))
         void onDetectedCookies?.(nextInventory)
     }, [categoryRules, onDetectedCookies, requiredCookies])
 
@@ -331,17 +324,39 @@ export function CookieConsentProvider({
         refreshInventory()
     }, [refreshInventory, ready, state, preferencesOpen])
 
+    const runSweep = useCallback(
+        (nextCategories: Record<string, boolean>) => {
+            if (!sweepOnReject) {
+                return
+            }
+
+            const removed = sweepRejectedStorage({
+                categories: nextCategories,
+                requiredCookies,
+                categoryRules,
+                // Honey's own record is never in scope: wiping it would erase
+                // the very decision that triggered the sweep.
+                protectedNames: [storageKey, `${storageKey}-key`, cookieName],
+            })
+
+            if (removed.cookies.length || removed.localStorage.length || removed.sessionStorage.length) {
+                onSweep?.(removed)
+            }
+        },
+        [categoryRules, cookieName, onSweep, requiredCookies, storageKey, sweepOnReject]
+    )
+
     const persistState = useCallback(
         async (nextState: CookieConsentState) => {
             setState(nextState)
             dispatchCookieConsentChange(nextState)
 
             if (persist) {
-                writeStoredCookieConsent(
-                    {storage, storageKey, cookieName, cookieMaxAgeDays},
-                    nextState
-                )
+                writeStoredCookieConsent({storage, storageKey, cookieName, cookieMaxAgeDays}, nextState)
             }
+
+            // After the decision is stored, so a sweep that throws cannot lose it.
+            runSweep(nextState.categories)
 
             onConsentChange?.(nextState)
 
@@ -349,7 +364,7 @@ export function CookieConsentProvider({
                 await saveConsent(nextState)
             }
         },
-        [cookieMaxAgeDays, cookieName, onConsentChange, persist, saveConsent, storage, storageKey]
+        [cookieMaxAgeDays, cookieName, onConsentChange, persist, runSweep, saveConsent, storage, storageKey]
     )
 
     const showBanner = useCallback(() => {
@@ -430,12 +445,19 @@ export function CookieConsentProvider({
             clearStoredCookieConsent({storage, storageKey, cookieName})
         }
 
+        runSweep(
+            categoriesRef.current.reduce<Record<string, boolean>>((acc, category) => {
+                acc[category.key] = Boolean(category.required)
+                return acc
+            }, {})
+        )
+
         setState(null)
         dispatchCookieConsentChange(null)
         setPreferencesOpen(false)
         setBannerOpen(autoShow)
         onWithdraw?.()
-    }, [autoShow, cookieName, onWithdraw, persist, storage, storageKey])
+    }, [autoShow, cookieName, onWithdraw, persist, runSweep, storage, storageKey])
 
     const hasConsent = useCallback(
         (category: string) => {

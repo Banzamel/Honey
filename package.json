@@ -1,101 +1,101 @@
 {
-  "name": "@banzamel/honey",
-  "version": "1.1.0",
-  "description": "Standalone, themable cookie-consent system — banner, preferences, declaration, GDPR/RODO-friendly. Works on its own; sweet alongside MineralUI.",
-  "private": false,
-  "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "cookie-consent-bootstrap": [
-        "dist/cookie-consent-bootstrap.d.ts"
-      ]
+    "name": "@banzamel/honey",
+    "version": "1.2.0",
+    "description": "Standalone, themable cookie-consent system — banner, preferences, declaration, GDPR/RODO-friendly. Works on its own; sweet alongside MineralUI.",
+    "private": false,
+    "type": "module",
+    "main": "dist/index.cjs",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "cookie-consent-bootstrap": [
+                "dist/cookie-consent-bootstrap.d.ts"
+            ]
+        }
+    },
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.cjs"
+            }
+        },
+        "./cookie-consent-bootstrap": {
+            "import": {
+                "types": "./dist/cookie-consent-bootstrap.d.ts",
+                "default": "./dist/cookie-consent-bootstrap.js"
+            },
+            "require": {
+                "types": "./dist/cookie-consent-bootstrap.d.ts",
+                "default": "./dist/cookie-consent-bootstrap.cjs"
+            }
+        },
+        "./styles.css": "./dist/styles.css"
+    },
+    "files": [
+        "dist",
+        "bin",
+        "scripts",
+        "README.md",
+        "LICENSE"
+    ],
+    "bin": {
+        "honey": "bin/honey.js"
+    },
+    "sideEffects": [
+        "*.css",
+        "dist/*.js",
+        "dist/*.cjs"
+    ],
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+        "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
+        "prepublishOnly": "npm run build",
+        "postinstall": "node ./scripts/honey-postinstall.mjs"
+    },
+    "peerDependencies": {
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^25.5.0",
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
+        "prettier": "^3.8.1",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
+        "typescript": "^5.9.3",
+        "vite": "^8.0.5",
+        "vite-plugin-dts": "^4.5.4"
+    },
+    "keywords": [
+        "cookies",
+        "cookie-consent",
+        "gdpr",
+        "rodo",
+        "react",
+        "consent-management",
+        "privacy",
+        "css-variables",
+        "themable",
+        "honey"
+    ],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Banzamel/honey.git"
+    },
+    "author": "Rafal Polak",
+    "homepage": "https://honey.mineralui.io",
+    "bugs": {
+        "url": "https://github.com/Banzamel/honey/issues"
     }
-  },
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
-      }
-    },
-    "./cookie-consent-bootstrap": {
-      "import": {
-        "types": "./dist/cookie-consent-bootstrap.d.ts",
-        "default": "./dist/cookie-consent-bootstrap.js"
-      },
-      "require": {
-        "types": "./dist/cookie-consent-bootstrap.d.ts",
-        "default": "./dist/cookie-consent-bootstrap.cjs"
-      }
-    },
-    "./styles.css": "./dist/styles.css"
-  },
-  "files": [
-    "dist",
-    "bin",
-    "scripts",
-    "README.md",
-    "LICENSE"
-  ],
-  "bin": {
-    "honey": "bin/honey.js"
-  },
-  "sideEffects": [
-    "*.css",
-    "dist/*.js",
-    "dist/*.cjs"
-  ],
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
-    "prepublishOnly": "npm run build",
-    "postinstall": "node ./scripts/honey-postinstall.mjs"
-  },
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "prettier": "^3.8.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.5",
-    "vite-plugin-dts": "^4.5.4"
-  },
-  "keywords": [
-    "cookies",
-    "cookie-consent",
-    "gdpr",
-    "rodo",
-    "react",
-    "consent-management",
-    "privacy",
-    "css-variables",
-    "themable",
-    "honey"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Banzamel/honey.git"
-  },
-  "author": "Rafal Polak",
-  "homepage": "https://github.com/Banzamel/honey",
-  "bugs": {
-    "url": "https://github.com/Banzamel/honey/issues"
-  }
 }

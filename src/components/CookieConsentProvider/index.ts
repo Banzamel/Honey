@@ -1,11 +1,7 @@
 export {CookieConsentProvider} from './CookieConsentProvider'
 export type {CookieConsentProviderProps} from './CookieConsentProvider'
 
-export {
-    useCookieConsent,
-    useOptionalCookieConsent,
-    CookieConsentContextProvider,
-} from './CookieConsentContext'
+export {useCookieConsent, useOptionalCookieConsent, CookieConsentContextProvider} from './CookieConsentContext'
 export type {CookieConsentContextValue} from './CookieConsentContext'
 
 export {HONEY_CONSENT_CHANGE_EVENT} from './bootstrap-events'
@@ -22,10 +18,9 @@ export {
     mergeCookieConsentTexts,
 } from './CookieConsent.defaults'
 
-export {
-    clearStoredCookieConsent,
-    readStoredCookieConsent,
-    writeStoredCookieConsent,
-} from './CookieConsent.storage'
+export {clearStoredCookieConsent, readStoredCookieConsent, writeStoredCookieConsent} from './CookieConsent.storage'
 
-export {detectDocumentCookies} from './CookieConsent.inventory'
+export {classifyStorageEntry, detectDocumentCookies} from './CookieConsent.inventory'
+
+export {sweepRejectedStorage} from './CookieConsent.sweep'
+export type {CookieConsentSweepOptions, CookieConsentSweepResult} from './CookieConsent.sweep'

@@ -1,10 +1,5 @@
 import {COOKIE_CONSENT_COOKIE_NAME} from './CookieConsent.defaults'
-import type {
-    CookieCategoryRules,
-    CookieMatchRule,
-    DetectedCookie,
-    DetectedCookieMatch,
-} from '../../types'
+import type {CookieCategoryRules, CookieMatchRule, DetectedCookie} from '../../types'
 
 /**
  * Patterns that always classify a cookie as necessary, regardless of consumer
@@ -32,29 +27,8 @@ const INTERNAL_REQUIRED_COOKIE_RULES: CookieMatchRule[] = [
  *  this via the provider's `categoryRules` prop. */
 const BUILT_IN_CATEGORY_RULES: Record<string, CookieMatchRule[]> = {
     preferences: [/theme/i, /locale/i, /lang/i, /currency/i, /timezone/i, /consent/i],
-    analytics: [
-        /^_ga/i,
-        /^_gid/i,
-        /^_gat/i,
-        /^_pk_/i,
-        /^pk_/i,
-        /^_hj/i,
-        /^hj/i,
-        /^amplitude/i,
-        /^mp_/i,
-        /^matomo/i,
-    ],
-    marketing: [
-        /^_fbp$/i,
-        /^_fbc$/i,
-        /^_gcl_/i,
-        /^IDE$/i,
-        /^test_cookie$/i,
-        /^li_/i,
-        /^tt_/i,
-        /^_uet/i,
-        /^pin_utm/i,
-    ],
+    analytics: [/^_ga/i, /^_gid/i, /^_gat/i, /^_pk_/i, /^pk_/i, /^_hj/i, /^hj/i, /^amplitude/i, /^mp_/i, /^matomo/i],
+    marketing: [/^_fbp$/i, /^_fbc$/i, /^_gcl_/i, /^IDE$/i, /^test_cookie$/i, /^li_/i, /^tt_/i, /^_uet/i, /^pin_utm/i],
 }
 
 function matchCookieRule(name: string, rule: CookieMatchRule) {
@@ -99,7 +73,10 @@ function parseDocumentCookies(cookieString: string) {
         .filter((item) => item.name.length > 0)
 }
 
-function classifyCookie(
+/** Shared classifier for anything a site stores under a name: cookies and
+ *  Web Storage keys alike. `matchedBy` records how confident the answer is,
+ *  which is what lets the sweep leave `fallback` entries untouched. */
+export function classifyStorageEntry(
     name: string,
     requiredCookies: CookieMatchRule[],
     categoryRules: CookieCategoryRules
@@ -135,14 +112,14 @@ export function detectDocumentCookies({
     const source = cookieString ?? (typeof document !== 'undefined' ? document.cookie : '')
 
     return parseDocumentCookies(source).map<DetectedCookie>((item) => {
-        const classification = classifyCookie(item.name, requiredCookies, categoryRules)
+        const classification = classifyStorageEntry(item.name, requiredCookies, categoryRules)
 
         return {
             name: item.name,
             value: item.value,
             category: classification.category,
             required: classification.required,
-            matchedBy: classification.matchedBy as DetectedCookieMatch,
+            matchedBy: classification.matchedBy,
             source: 'document.cookie',
         }
     })

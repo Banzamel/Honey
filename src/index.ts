@@ -37,10 +37,14 @@ export {
     readStoredCookieConsent,
     writeStoredCookieConsent,
     detectDocumentCookies,
+    classifyStorageEntry,
+    sweepRejectedStorage,
 } from './components/CookieConsentProvider'
 export type {
     CookieConsentProviderProps,
     CookieConsentContextValue,
+    CookieConsentSweepOptions,
+    CookieConsentSweepResult,
     HoneyConsentChangeEventDetail,
 } from './components/CookieConsentProvider'
 
@@ -73,20 +77,13 @@ export type {
 
 // UI components
 export {CookieBanner} from './components/CookieBanner'
-export type {
-    CookieBannerProps,
-    CookieBannerPosition,
-    CookieBannerVariant,
-} from './components/CookieBanner'
+export type {CookieBannerProps, CookieBannerPosition, CookieBannerVariant} from './components/CookieBanner'
 
 export {CookieTrigger} from './components/CookieTrigger'
 export type {CookieTriggerProps, CookieTriggerVariant} from './components/CookieTrigger'
 
 export {CookiePreferences} from './components/CookiePreferences'
-export type {
-    CookiePreferencesProps,
-    CookiePreferencesVariant,
-} from './components/CookiePreferences'
+export type {CookiePreferencesProps, CookiePreferencesVariant} from './components/CookiePreferences'
 
 export {CookieDeclaration} from './components/CookieDeclaration'
 export type {CookieDeclarationProps} from './components/CookieDeclaration'
