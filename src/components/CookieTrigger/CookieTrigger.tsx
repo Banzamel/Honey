@@ -9,6 +9,8 @@ export interface CookieTriggerProps extends Omit<ButtonHTMLAttributes<HTMLButton
     /** Visual variant. `'link'` is the underline-on-hover footer style (default),
      *  `'button'` is a filled CTA, `'ghost'` is a quiet button without border. */
     variant?: CookieTriggerVariant
+    /** Colour of the button variants and of the `'link'` text. On a link `'neutral'`
+     *  takes the surrounding text colour, so it matches neighbouring footer links. */
     color?: HoneyColor
     /** Text shown inside the trigger. Falls back to `texts.triggerLabel` from
      *  the provider (defaults to "Cookie settings"). */
@@ -46,7 +48,7 @@ export function CookieTrigger({
         return (
             <button
                 type={type ?? 'button'}
-                className={cn('honey-link', 'honey-cookie-trigger-link', className)}
+                className={cn('honey-link', 'honey-cookie-trigger-link', `honey-link-color-${color}`, className)}
                 onClick={handleClick}
                 {...rest}
             >

@@ -1,6 +1,6 @@
 {
     "name": "@banzamel/honey",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Standalone, themable cookie-consent system — banner, preferences, declaration, GDPR/RODO-friendly. Works on its own; sweet alongside MineralUI.",
     "private": false,
     "type": "module",

@@ -8,3 +8,24 @@
     font: inherit;
     cursor: pointer;
 }
+
+/* `color` on the link variant; primary keeps the .honey-link default. */
+.honey-cookie-trigger-link.honey-link-color-neutral {
+    color: inherit;
+}
+
+.honey-cookie-trigger-link.honey-link-color-success {
+    color: rgba(var(--honey-success-rgb), 1);
+}
+
+.honey-cookie-trigger-link.honey-link-color-warning {
+    color: rgba(var(--honey-warning-rgb), 1);
+}
+
+.honey-cookie-trigger-link.honey-link-color-error {
+    color: rgba(var(--honey-error-rgb), 1);
+}
+
+.honey-cookie-trigger-link.honey-link-color-info {
+    color: rgba(var(--honey-info-rgb), 1);
+}
